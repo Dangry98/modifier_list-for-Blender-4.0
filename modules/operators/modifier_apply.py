@@ -75,6 +75,7 @@ class ApplyModifier:
         items=multi_user_data_apply_method_items,
         default='NONE',
         options={'HIDDEN', 'SKIP_SAVE'})
+    delete_gizmo: BoolProperty(default=False, options={'HIDDEN', 'SKIP_SAVE'})
 
     apply_as: None
     keep_modifier_when_applying_as_shapekey = False
@@ -151,7 +152,7 @@ class ApplyModifier:
             self.report({'INFO'}, "Applied modifier was not first, result may not be as expected")
 
         # Delete the gizmo object and the vertex group
-        if self.shift or prefs.always_delete_gizmo:
+        if self.delete_gizmo or prefs.always_delete_gizmo:
             if not self.keep_modifier_when_applying_as_shapekey:
                 self.delete_gizmo_and_vertex_group(context, ml_active_ob, mod_type, gizmo_ob,
                                                    vert_group)
@@ -159,7 +160,7 @@ class ApplyModifier:
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        self.shift = event.shift
+        self.delete_gizmo = self.delete_gizmo or event.shift
         ml_active_ob = get_ml_active_object()
         active_mod_index = ml_active_ob.ml_modifier_active_index
         active_mod = ml_active_ob.modifiers[active_mod_index]

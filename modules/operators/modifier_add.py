@@ -24,6 +24,8 @@ class OBJECT_OT_ml_modifier_add(Operator):
 
     modifier_type: StringProperty(options={'HIDDEN'})
     after_active: BoolProperty(name="After Active", default=False)
+    add_gizmo: BoolProperty(default=False, options={'HIDDEN', 'SKIP_SAVE'})
+    use_world_origin: BoolProperty(default=False, options={'HIDDEN', 'SKIP_SAVE'})
 
     @classmethod
     def poll(cls, context):
@@ -83,9 +85,9 @@ class OBJECT_OT_ml_modifier_add(Operator):
         if ob.modifiers:
             mod = ob.modifiers[-1 - pinned_modifiers_amount] 
 
-        if self.shift and ob.type in {'CURVE', 'FONT', 'LATTICE', 'MESH', 'SURFACE'}:
+        if self.add_gizmo and ob.type in {'CURVE', 'FONT', 'LATTICE', 'MESH', 'SURFACE'}:
             if mod.type in HAVE_GIZMO_PROPERTY or mod.type == 'UV_PROJECT':
-                placement = 'WORLD_ORIGIN' if self.ctrl else 'OBJECT'
+                placement = 'WORLD_ORIGIN' if self.use_world_origin else 'OBJECT'
                 assign_gizmo_object_to_modifier(self, context, mod.name, placement=placement)
 
         # === Move modifier into place ===
@@ -100,7 +102,7 @@ class OBJECT_OT_ml_modifier_add(Operator):
             return {'FINISHED'}
 
         prefs = bpy.context.preferences.addons[base_package].preferences
-        move = not self.ctrl if prefs.insert_modifier_after_active else self.ctrl 
+        move = not self.use_world_origin if prefs.insert_modifier_after_active else self.use_world_origin
         if self.after_active: # Option to override the preference
             move = True
 
@@ -114,9 +116,9 @@ class OBJECT_OT_ml_modifier_add(Operator):
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        self.ctrl = event.ctrl
-        self.shift = event.shift
-        self.alt = event.alt
+        self.use_world_origin = event.ctrl
+        self.add_gizmo = event.shift
+        self.alt = event.alt # NOTE: never used?
 
         return self.execute(context)
 

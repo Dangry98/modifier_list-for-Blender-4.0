@@ -18,21 +18,27 @@ class OBJECT_OT_ml_gizmo_object_add(Operator):
     bl_options = {'REGISTER', 'INTERNAL', 'UNDO'}
 
     modifier: StringProperty()
+    placement: EnumProperty(default='NONE', items=(
+        ('NONE', 'None', ''),
+        ('CURSOR', '3D Cursor', ''),
+        ('WORLD_ORIGIN', 'World Origin', ''),
+        ('OBJECT', 'Object Origin', ''),
+    ),
+    options={'HIDDEN', 'SKIP_SAVE'})
 
     def execute(self, context):
-        if self.shift:
-            placement = 'CURSOR'
-        elif self.ctrl:
-            placement = 'WORLD_ORIGIN'
-        else:
-            placement = 'OBJECT'
-        
-        assign_gizmo_object_to_modifier(self, context, self.modifier, placement=placement)
+        self.placement = "OBJECT" if self.placement == 'NONE' else self.placement
+        assign_gizmo_object_to_modifier(self, context, self.modifier, placement=self.placement)
 
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        self.shift = event.shift
-        self.ctrl = event.ctrl
+        if self.placement == 'NONE':
+            if event.shift:
+                self.placement = 'CURSOR'
+            elif event.ctrl:
+                self.placement = 'WORLD_ORIGIN'
+            else:
+                self.placement = 'OBJECT'
 
         return self.execute(context)
