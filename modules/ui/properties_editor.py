@@ -44,6 +44,8 @@ def register_DATA_PT_modifiers(self, context):
 
     if use_properties_editor:
         try:
+            if original_DATA_PT_modifiers.is_registered:
+                unregister_class(original_DATA_PT_modifiers)
             register_class(DATA_PT_modifiers)
         except ValueError:
             pass
