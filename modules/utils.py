@@ -2,6 +2,7 @@ import bpy
 from mathutils import Matrix, Vector
 from mathutils.geometry import distance_point_to_plane
 
+from typing import Union
 from .modifier_categories import ALL_MODIFIERS_NAMES_ICONS_TYPES, HAVE_GIZMO_PROPERTY
 from .. import __package__ as base_package
 
@@ -51,10 +52,12 @@ def favourite_modifiers_names_icons_types():
     favorite_mods = get_favourite_modifiers().values()
     return (all_mods_dict[mod] if mod else (None, None, None) for mod in favorite_mods)
 
-def get_ml_active_object():
+def get_ml_active_object() -> Union[bpy.types.Object, None]:
     """Get the active object or if some object is pinned, get that"""
     context = bpy.context
     ob = context.object
+    if ob is None:
+        return None
 
     #get if the obj is a Duplicate Linked Modifiers obj
     if ob:
